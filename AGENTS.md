@@ -84,7 +84,7 @@ Values available only after provisioning, such as an RDS endpoint, must be ident
 
 ## Documentation lookup before implementation
 
-Before writing code that uses a library or infrastructure API, verify the relevant API against official documentation for the selected version. This applies to Express, Drizzle, drizzle-zod, Zod, Better Auth, BullMQ, React, Vite, Tailwind, Terraform and its AWS provider, AWS services, and Docker Compose.
+Before writing code that uses a library or infrastructure API, verify the relevant API against official documentation for the selected version. This applies to Express, Drizzle, drizzle-zod, Zod, Better Auth, BullMQ, Angular, Angular CLI, Tailwind, Terraform and its AWS provider, AWS services, and Docker Compose.
 
 1. Check for Context7 tools that resolve a library ID and retrieve documentation. Tool names can vary by integration.
 2. Resolve the library, then retrieve documentation for the relevant topic and version before implementing it. Reuse verified documentation within the task unless the topic or version changes.
@@ -98,7 +98,7 @@ Before writing code that uses a library or infrastructure API, verify the releva
 - Node 22, TypeScript strict, Express, Drizzle, Zod with drizzle-zod, BullMQ with Redis, and self-hosted Better Auth.
 - Postgres 16: Docker Compose locally, RDS in deployed environments. Postgres is the system of record. Redis stores queue and scheduling data only. No other datastores.
 - S3 for deployed files, using presigned URLs for direct browser upload/download.
-- Docker Compose locally and on EC2. Build the frontend with React, Vite, and Tailwind CSS; serve its static files from Express.
+- Docker Compose locally and on EC2. Build the frontend as a client-rendered SPA with Angular, Angular CLI, and Tailwind CSS; serve its static files from Express. Use Angular CLI's supported build and development tooling, including its built-in Vite development server; do not add a standalone Vite setup. Angular CLI provides template and style HMR during development; application logic changes may require a full reload.
 - Terraform in one flat application root module: EC2 host, RDS, S3 app buckets, ECR, and security groups in the account's default VPC. No child modules, ECS, custom networking, or load balancer unless an approved plan explicitly allows them.
 - GitHub Actions with one deployment job per approved environment, using GitHub Environments and OIDC.
 
@@ -122,7 +122,7 @@ Before writing code that uses a library or infrastructure API, verify the releva
 - Send background work to BullMQ queues; make retryable operations idempotent. Keep durable business state in Postgres.
 - Keep the JSON API stable and documented for a future iOS client.
 - Supply `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and other runtime configuration through local `.env` or environment-scoped deployment configuration. Inject deployment secrets into the host environment file or Compose at deploy time, never into the image.
-- Use plain, simple code. No code generator CLI.
+- Use plain, simple code. No code generator CLI. Angular CLI is allowed for build and serve commands, but not code generation.
 
 ## Phase 4 — Launch
 
