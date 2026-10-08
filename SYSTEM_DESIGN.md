@@ -9,7 +9,7 @@ and how data and deploys flow through it. For build instructions, see
 One TypeScript codebase produces one Docker image. That image runs as two
 services — a web app and a background worker — on a single EC2 host in
 production, or on your laptop via Docker Compose locally. The web app serves
-both the JSON API and the React frontend. Postgres holds all durable state,
+both the JSON API and the Angular frontend. Postgres holds all durable state,
 Redis holds only queue data, files live in S3, and GitHub Actions deploys
 everything by assuming short-lived AWS credentials (OIDC, no stored keys).
 
@@ -60,19 +60,26 @@ The Express server handles three kinds of traffic:
   talks to this. Inputs are validated, errors use the envelope
   `{ error: { code, message } }`, lists paginate with `?page=&per_page=`.
 - `/api/auth/*` — login/signup/session endpoints, owned by Better Auth.
-- Everything else — the built React app (`index.html` + assets) with
+- Everything else — the built Angular app (`index.html` + assets) with
   SPA fallback, so client-side routing works on refresh.
 
 Why one process? Fewer moving parts, one image to build, and the app
 stays stateless (see below), so a future load balancer can add copies
 without changing code.
 
-### 2. Frontend: React + Vite + Tailwind, built to static files
+### 2. Frontend: Angular + Angular CLI + Tailwind, built to static files
 
-The UI is a normal Vite React app. `vite build` emits static files that
-the Express process serves — there is no separate frontend server or
-hosting service. The browser calls the same origin's `/api/v1`, so there
-are no CORS gymnastics.
+The UI is a client-rendered Angular SPA. Angular CLI's `ng build` emits
+static files that the Express process serves — there is no separate
+production frontend server or hosting service. The browser calls the
+same origin's `/api/v1`, so there are no CORS gymnastics.
+
+For frontend development, Angular CLI's `ng serve` uses its built-in Vite
+development server; there is no standalone Vite configuration. It supports
+HMR for component templates and styles. TypeScript application logic
+changes may require a full page reload. Production builds use Angular
+CLI's esbuild-based tooling. Angular CLI is allowed for building and
+serving, but code generation remains prohibited by the template rules.
 
 ### 3. Auth: Better Auth, sessions in Postgres
 
@@ -178,7 +185,7 @@ confirmation gate and a backup-first step — destructive by design.
 ## How a request flows (examples)
 
 **Page load:** browser → EC2 → Express serves `index.html` + assets →
-React boots → calls `GET /api/v1/...` on the same origin.
+Angular boots → calls `GET /api/v1/...` on the same origin.
 
 **Signup:** browser → `/api/auth/sign-up` → Better Auth validates,
 writes user + session rows to Postgres → returns session cookie →
